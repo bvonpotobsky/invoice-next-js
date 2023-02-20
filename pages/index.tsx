@@ -15,12 +15,11 @@ const schema = z.object({
   company: z.string().min(1, {message: "Required"}),
   rate: z.number().min(1, {message: "Required"}),
   hoursWorked: z.number().min(1, {message: "Required"}),
-  week: z.string().min(1, {message: "Required"}),
-  paymentDetails: z.object({
-    accountName: z.string().min(1, {message: "Required"}),
-    bsb: z.string().min(1, {message: "Required"}),
-    accountNumber: z.string().min(1, {message: "Required"}),
-  }),
+  from: z.string(),
+  to: z.string(),
+  accountName: z.string(),
+  bsb: z.number(),
+  accountNumber: z.number(),
 });
 
 export default function Home() {
@@ -34,17 +33,17 @@ export default function Home() {
     console.log(data);
 
     await axios.post("/api/invoice", {
-      username: "Benjamin",
-      abn: "ABN[username]",
-      company: "Everest",
-      rate: 14,
-      hours: 10,
-      amount: 140,
-      week: "lastWeek ?? customWeek",
+      username: data.username,
+      abn: data.abn,
+      company: data.company,
+      rate: data.rate,
+      hours: data.hoursWorked,
+      amount: data.rate * data.hoursWorked,
+      week: `${data.from} - ${data.to}`,
       paymentDetails: {
-        accountName: "Benjamin",
-        bsb: "123-456",
-        accountNumber: "123456789",
+        accountName: data.accountName,
+        bsb: data.bsb,
+        accountNumber: data.accountNumber,
       },
     });
   };
@@ -119,22 +118,22 @@ export default function Home() {
         </Input>
 
         <div className="flex items-center">
-          <Input label="From" id="week" error={errors.username}>
+          <Input label="From" id="week-from" error={errors.username}>
             <input
-              {...register("week")}
-              type="date"
-              name="week"
-              id="week"
+              {...register("from")}
+              type="text"
+              name="week-from"
+              id="week-from"
               className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
               autoComplete="off"
             />
           </Input>
-          <Input label="To" id="week" error={errors.username}>
+          <Input label="To" id="week-to" error={errors.username}>
             <input
-              {...register("week")}
-              type="date"
-              name="week"
-              id="week"
+              {...register("to")}
+              type="text"
+              name="week-to"
+              id="week-to"
               className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
               autoComplete="off"
             />
@@ -145,8 +144,8 @@ export default function Home() {
 
         <Input label="Account name" id="accountName" error={errors.username}>
           <input
-            {...register("paymentDetails.accountName", {valueAsNumber: true})}
-            type="string"
+            {...register("accountName")}
+            type="text"
             name="accountName"
             id="accountName"
             className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
@@ -156,7 +155,7 @@ export default function Home() {
 
         <Input label="BSB" id="bsb" error={errors.username}>
           <input
-            {...register("paymentDetails.bsb", {valueAsNumber: true})}
+            {...register("bsb", {valueAsNumber: true})}
             type="number"
             name="bsb"
             id="bsb"
@@ -165,12 +164,12 @@ export default function Home() {
           />
         </Input>
 
-        <Input label="Account number" id="hoursWorked" error={errors.username}>
+        <Input label="Account number" id="accountNumber" error={errors.username}>
           <input
-            {...register("paymentDetails.accountNumber", {valueAsNumber: true})}
+            {...register("accountNumber", {valueAsNumber: true})}
             type="number"
-            name="hoursWorked"
-            id="hoursWorked"
+            name="accountNumber"
+            id="accountNumber"
             className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
             autoComplete="off"
           />
