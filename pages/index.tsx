@@ -1,11 +1,56 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import {Inter} from "@next/font/google";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {ReactNode} from "react";
 
-const inter = Inter({ subsets: ['latin'] })
+import axios from "axios";
+
+const inter = Inter({subsets: ["latin"]});
+
+const schema = z.object({
+  username: z.string().min(1, {message: "Required"}),
+  abn: z.number().min(1, {message: "Required"}),
+  company: z.string().min(1, {message: "Required"}),
+  rate: z.number().min(1, {message: "Required"}),
+  hoursWorked: z.number().min(1, {message: "Required"}),
+  week: z.string().min(1, {message: "Required"}),
+  paymentDetails: z.object({
+    accountName: z.string().min(1, {message: "Required"}),
+    bsb: z.string().min(1, {message: "Required"}),
+    accountNumber: z.string().min(1, {message: "Required"}),
+  }),
+});
 
 export default function Home() {
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = useForm<z.infer<typeof schema>>({resolver: zodResolver(schema)});
+
+  const onSubmit = async (data: z.infer<typeof schema>) => {
+    console.log(data);
+
+    await axios.post("/api/invoice", {
+      username: "Benjamin",
+      abn: "ABN[username]",
+      company: "Everest",
+      rate: 14,
+      hours: 10,
+      amount: 140,
+      week: "lastWeek ?? customWeek",
+      paymentDetails: {
+        accountName: "Benjamin",
+        bsb: "123-456",
+        accountNumber: "123456789",
+      },
+    });
+  };
+
+  console.log({errors});
+
   return (
     <>
       <Head>
@@ -14,110 +59,140 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
 
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xl flex flex-col p-4 gap-2 mx-auto">
+        <h1 className="text-center">Invoice maker!</h1>
+
+        <Input label="What's your name?" id="username" error={errors.username}>
+          <input
+            {...register("username")}
+            type="text"
+            name="username"
+            id="username"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
           />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
+        </Input>
+
+        <Input label="ABN" id="abn" error={errors.username}>
+          <input
+            {...register("abn", {valueAsNumber: true})}
+            type="number"
+            name="abn"
+            id="abn"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
+
+        <Input label="Who are you invoicing?" id="company" error={errors.username}>
+          <input
+            {...register("company")}
+            type="text"
+            name="company"
+            id="company"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
+
+        <Input label="Insert your hourly rate" id="rate" error={errors.username}>
+          <input
+            {...register("rate", {valueAsNumber: true})}
+            type="number"
+            name="rate"
+            id="rate"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
+
+        <Input label="How many hours did you work?" id="hoursWorked" error={errors.username}>
+          <input
+            {...register("hoursWorked", {valueAsNumber: true})}
+            type="number"
+            name="hoursWorked"
+            id="hoursWorked"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
+
+        <div className="flex items-center">
+          <Input label="From" id="week" error={errors.username}>
+            <input
+              {...register("week")}
+              type="date"
+              name="week"
+              id="week"
+              className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+              autoComplete="off"
             />
-          </div>
+          </Input>
+          <Input label="To" id="week" error={errors.username}>
+            <input
+              {...register("week")}
+              type="date"
+              name="week"
+              id="week"
+              className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+              autoComplete="off"
+            />
+          </Input>
         </div>
 
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
+        <h3 className="mb-2 font-bold">Payments Details</h3>
 
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
+        <Input label="Account name" id="accountName" error={errors.username}>
+          <input
+            {...register("paymentDetails.accountName", {valueAsNumber: true})}
+            type="string"
+            name="accountName"
+            id="accountName"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
 
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
+        <Input label="BSB" id="bsb" error={errors.username}>
+          <input
+            {...register("paymentDetails.bsb", {valueAsNumber: true})}
+            type="number"
+            name="bsb"
+            id="bsb"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+        <Input label="Account number" id="hoursWorked" error={errors.username}>
+          <input
+            {...register("paymentDetails.accountNumber", {valueAsNumber: true})}
+            type="number"
+            name="hoursWorked"
+            id="hoursWorked"
+            className="peer mt-1 w-full border border-white bg-transparent px-2 py-1.5 text-sm placeholder:text-transparent focus:outline-none"
+            autoComplete="off"
+          />
+        </Input>
+
+        <input type="submit" value="Make invoice!" className="cursor-pointer self-center px-2 py-1 rounded bg-sky-500" />
+      </form>
     </>
-  )
+  );
 }
+
+const Input = ({id, label, children, error}: {label: string; id: string; children: ReactNode; error?: any}) => {
+  return (
+    <div className={`relative w-full ${error ? "border-red-500" : "border-green-800"}`}>
+      {children}
+
+      <label
+        htmlFor={id}
+        className="pointer-events-none absolute top-0 left-1 px-1 mt-0.5 text-sky-500 bg-[#0a2339] origin-left -translate-y-1/2 transform text-sm transition-all duration-300 ease-in-out peer-placeholder-shown:top-1/2 peer-focus:top-0 peer-focus:text-sm"
+      >
+        {label}
+      </label>
+    </div>
+  );
+};
