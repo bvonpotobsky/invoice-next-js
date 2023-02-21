@@ -9,28 +9,14 @@ import createTemplate from "../../components/create-template";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   if (req.method === "POST") {
-    const result = await createTemplate(req.body);
+    const invoice = await createTemplate(req.body);
+    const userAgent = req.headers["user-agent"];
 
-    // Setting up the response headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
-
-    // Save the resulting pdf in the file system
-    const {username, company, week} = req.body;
-    const weekWithoutSpaces = week.replace(/\s/g, ""); // Remove spaces from week
-
-    const desktopPath = os.homedir() + "/Desktop";
-    // const folderPath = path.join(desktopPath, `invoices/${username}/${company}`);
-    const folderPath = path.join(desktopPath, `trial/${username}/${company}`);
-    const filePath = path.join(folderPath, `${weekWithoutSpaces}_${username}.pdf`);
-
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, {recursive: true});
+    // Download the invoice as a PDF in mobile devices
+    if (userAgent.includes("Android") || userAgent.includes("iPhone")) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+      res.send(invoice);
     }
-
-    result.pipe(fs.createWriteStream(filePath));
-
-    // Sending the response
-    result.pipe(res);
   }
 }
